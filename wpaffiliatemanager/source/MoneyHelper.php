@@ -3,12 +3,11 @@
 class WPAM_MoneyHelper {
 
 	public static function getDollarSign() {
-		$info = localeconv();
-		if( ! empty( $info['currency_symbol'] ) ) {
-			return $info['currency_symbol'];
-		} else {
-			return '$';
-		}
+            $currency_symbol = get_option(WPAM_PluginConfig::$AffCurrencySymbol);
+            if(empty($currency_symbol)){
+               $currency_symbol = '$';
+            }
+            return $currency_symbol;
 	}
 
 	public static function getCurrencyCode() {
