@@ -15,6 +15,12 @@ class WPAM_Validation_EmailValidator implements WPAM_Validation_IValidator
 	}
 
 	function isValid($value) {
+		// First check if the value is a string. If not, return false. Because is_email() will occur error if the value is not a string, which is not what we want.
+		if (!is_string($value)){
+			// User might passed an array to manipulate the sql.
+			return false;
+		}
+
 		$is_email = is_email( $value );
 		$return = $is_email ? true : false;
 		if ( WPAM_DEBUG )

@@ -72,6 +72,11 @@ class WPAM_Util_AffiliateFormHelper {
 
 	public function isEmailBlocked($value)
 	{
+		// Die if other that a string value is provided. Attacker might try to pass an array to manipulate the sql.
+		if (!is_string($value)) {
+			wp_die( __( "Invalid data provided", 'affiliates-manager' ) );
+		}
+
 		$db = new WPAM_Data_DataAccess();
 		$affRepo = $db->getAffiliateRepository();
 		return !$affRepo->existsBy(array('email' => $value, 'status' => 'blocked'));
@@ -79,6 +84,11 @@ class WPAM_Util_AffiliateFormHelper {
 
 	public function isEmailInUse($value)
 	{
+		// Die if other that a string value is provided. Attacker might try to pass an array to manipulate the sql.
+		if (!is_string($value)) {
+			wp_die( __( "Invalid data provided", 'affiliates-manager' ) );
+		}
+
 		$db = new WPAM_Data_DataAccess();
 		$affRepo = $db->getAffiliateRepository();
 
@@ -122,7 +132,7 @@ class WPAM_Util_AffiliateFormHelper {
 					case 'string':
 						$validator->addValidator($fieldName, new WPAM_Validation_StringValidator(1, $affiliateField->length));
 						break;
-                                        case 'textarea':
+					case 'textarea':
 						$validator->addValidator($fieldName, new WPAM_Validation_StringValidator(1));
 						break;    
 					case 'email':
