@@ -194,6 +194,8 @@ View screenshots in the following page:
 https://wpaffiliatemanager.com/screen-shots/
 
 == Changelog ==
+= WIP =
+- A vulnerability issue fixed for registration form.
 
 = 2.9.53 =
 - Fixed an issue with currency symbol not displaying correctly.

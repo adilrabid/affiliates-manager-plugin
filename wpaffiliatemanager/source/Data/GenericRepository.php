@@ -218,18 +218,61 @@ class WPAM_Data_GenericRepository
 			}
 			else if (is_array($value))
 			{
+				// Expect an array of [$operator, $v]
 				list($operator, $v) = $value;
 
-				$condition .= " $operator ";
-				if ($operator == 'IN' OR $operator == 'NOT IN')
+				// Validate operator against an allowlist to prevent SQL injection
+				if (!is_string($operator)) {
+					$operator = '=';
+				}
+				$op = strtoupper(trim($operator));
+				$allowed = array('=', '!=', '<>', '<', '>', '<=', '>=', 'LIKE', 'NOT LIKE', 'IN', 'NOT IN', 'BETWEEN', 'IS', 'IS NOT');
+				if (!in_array($op, $allowed, true)) {
+					// Unknown operator — fall back to equality to remain safe
+					$op = '=';
+				}
+
+				if ($op == 'IN' || $op == 'NOT IN')
 				{
-					if (is_array($v))
+					if (is_array($v) && count($v) > 0)
 					{
-						$condition .= " ('".implode("','", $v)."')";
+						// Build a placeholder list and push each value into $values so prepare() can bind them safely
+						$placeholders = array();
+						foreach ($v as $valItem) {
+							$placeholders[] = '%s';
+							$values[] = $valItem;
+						}
+						$condition .= " $op (" . implode(", ", $placeholders) . ")";
+					} else {
+						// Empty IN() — produce a condition that is always false (safer than trying to interpolate user data)
+						if ($op === 'IN') {
+							$condition .= " IN (NULL)";
+						} else {
+							$condition .= " NOT IN (NULL)";
+						}
+					}
+				}
+				elseif ($op === 'BETWEEN' && is_array($v) && count($v) === 2)
+				{
+					// BETWEEN expects exactly two values
+					$condition .= " BETWEEN %s AND %s";
+					$values[] = $v[0];
+					$values[] = $v[1];
+				}
+				elseif (($op === 'IS' || $op === 'IS NOT'))
+				{
+					// IS (NOT) is used for NULL checks or boolean-like comparisons
+					if ($v === null) {
+						$condition .= " $op NULL";
+					} else {
+						$condition .= " $op %s";
+						$values[] = $v;
 					}
 				}
 				else
 				{
+					// Standard binary operators: use placeholders and let prepare() bind values
+					$condition .= " $op ";
 					if (is_string($v))
 						$condition .= '%s';
 					else
