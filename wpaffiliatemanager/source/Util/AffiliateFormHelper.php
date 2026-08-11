@@ -10,17 +10,22 @@ class WPAM_Util_AffiliateFormHelper {
                         
 			if ( $affiliateField->fieldType == 'phoneNumber' ){
 				$value = $request_value;
-                        }
+			}
 			else if ( $affiliateField->fieldType == 'ssn' && is_array( $request_value ) ){
 				$value = implode($request_value);
-                        }
+			}
 			else{
 				$value = $request_value;
-                        }
+			}
+
 			if ($affiliateField->type == 'base')
 			{
-				if ( $affiliateField->fieldType == 'email' && empty( $value ) )
-					continue; //#79 skip email update if not set
+				if ( $affiliateField->fieldType == 'email' ){
+					if(empty( $value )){
+						continue; //#79 skip email update if not set
+					}					
+					$value = sanitize_email($value);
+				}
 				$model->{$affiliateField->databaseField} = $value;
 			}
 			else
@@ -79,7 +84,12 @@ class WPAM_Util_AffiliateFormHelper {
 
 		$db = new WPAM_Data_DataAccess();
 		$affRepo = $db->getAffiliateRepository();
-		return !$affRepo->existsBy(array('email' => $value, 'status' => 'blocked'));
+		return !$affRepo->existsBy(
+			array(
+				'email' => sanitize_email($value),
+				'status' => 'blocked'
+			)
+		);
 	}
 
 	public function isEmailInUse($value)
@@ -94,7 +104,7 @@ class WPAM_Util_AffiliateFormHelper {
 
 		return !$affRepo->existsBy(
 			array(
-				'email' => $value,
+				'email' => sanitize_email($value),
 				'status' => array('!=', 'declined')
 			)
 		);
