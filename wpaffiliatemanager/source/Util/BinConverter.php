@@ -63,9 +63,9 @@ class WPAM_Util_BinConverter
 			$char_in = strcspn ($alpha, $str[$at++]);
 			if ($rshift > 0)
 			{
-				$char_out |= chr ($char_in << 8 - $rshift);
+				$char_out |= chr( ( $char_in << (8 - $rshift) ) & 0xFF );
 				$out .= $char_out;
-				$char_out = chr (0);
+				$char_out = chr(0);
 				if ($at >= $length)
 				{
 					break;
