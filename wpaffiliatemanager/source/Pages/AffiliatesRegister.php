@@ -74,41 +74,46 @@ class WPAM_Pages_AffiliatesRegister extends WPAM_Pages_PublicPage
 
 				$blogname = wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
 				$mailer = new WPAM_Util_EmailHandler();
-                                if(get_option(WPAM_PluginConfig::$SendAdminRegNotification) == 1){
-                                    //Notify admin that affiliate has registered
-                                    $message  = sprintf( __( 'New affiliate registration on your site %s:', 'affiliates-manager' ), $blogname) . "\r\n\r\n";        
-                                    $firstname = (isset($request['_firstName']) && !empty($request['_firstName'])) ? $request['_firstName'] : '';             
-                                    $lastname = (isset($request['_lastName']) && !empty($request['_lastName'])) ? $request['_lastName'] : '';  
-                                    $message .= sprintf( __( 'Name: %s %s', 'affiliates-manager' ), $firstname, $lastname) . "\r\n";                           
-                                    $email = (isset($request['_email']) && !empty($request['_email'])) ? $request['_email'] : '';
-                                    $message .= sprintf( __( 'Email: %s', 'affiliates-manager' ), $email) . "\r\n";                  
-                                    $companyName = (isset($request['_companyName']) && !empty($request['_companyName'])) ? $request['_companyName'] : '';
-                                    $message .= sprintf( __( 'Company: %s', 'affiliates-manager' ), $companyName) . "\r\n";
-                                    $websiteUrl = (isset($request['_websiteUrl']) && !empty($request['_websiteUrl'])) ? $request['_websiteUrl'] : '';
-                                    $message .= sprintf( __( 'Website: %s', 'affiliates-manager' ), $websiteUrl) . "\r\n";
-                                    $message .= "\r\n";
-                                    $message .= sprintf( __( 'View Application: %s', 'affiliates-manager' ),  admin_url('admin.php?page=wpam-affiliates&viewDetail='.$id)) . "\r\n";
-                                    $admin_email = get_option(WPAM_PluginConfig::$AdminRegNotificationEmail);
-                                    if(!isset($admin_email) || empty($admin_email)){
-                                        $admin_email = get_option('admin_email');
-                                    }
-                                    $mailer->mailAffiliate( $admin_email, __( 'New Affiliate Registration', 'affiliates-manager' ), $message );
-                                }
-                                $aff_first_name = $model->firstName;
-                                $aff_last_name = $model->lastName; 
-                                $aff_email = $model->email;
-                                $login_url = get_option(WPAM_PluginConfig::$AffLoginPageURL);
+
+				if(get_option(WPAM_PluginConfig::$SendAdminRegNotification) == 1){
+					//Notify admin that affiliate has registered
+					$message  = sprintf( __( 'New affiliate registration on your site %s:', 'affiliates-manager' ), $blogname) . "\r\n\r\n";        
+					$firstname = (isset($request['_firstName']) && !empty($request['_firstName'])) ? sanitize_text_field($request['_firstName']) : '';             
+					$lastname = (isset($request['_lastName']) && !empty($request['_lastName'])) ? sanitize_text_field($request['_lastName']) : '';  
+					$message .= sprintf( __( 'Name: %s %s', 'affiliates-manager' ), $firstname, $lastname) . "\r\n";                           
+					$email = (isset($request['_email']) && !empty($request['_email'])) ? sanitize_email($request['_email']) : '';
+					$message .= sprintf( __( 'Email: %s', 'affiliates-manager' ), $email) . "\r\n";                  
+					$companyName = (isset($request['_companyName']) && !empty($request['_companyName'])) ? sanitize_text_field($request['_companyName']) : '';
+					$message .= sprintf( __( 'Company: %s', 'affiliates-manager' ), $companyName) . "\r\n";
+					$websiteUrl = (isset($request['_websiteUrl']) && !empty($request['_websiteUrl'])) ? sanitize_url($request['_websiteUrl']) : '';
+					$message .= sprintf( __( 'Website: %s', 'affiliates-manager' ), $websiteUrl) . "\r\n";
+					$message .= "\r\n";
+					$message .= sprintf( __( 'View Application: %s', 'affiliates-manager' ),  admin_url('admin.php?page=wpam-affiliates&viewDetail='.$id)) . "\r\n";
+					$admin_email = get_option(WPAM_PluginConfig::$AdminRegNotificationEmail);
+					if(!isset($admin_email) || empty($admin_email)){
+						$admin_email = get_option('admin_email');
+					}
+					$mailer->mailAffiliate( $admin_email, __( 'New Affiliate Registration', 'affiliates-manager' ), $message );
+				}
+
+				$aff_first_name = $model->firstName;
+				$aff_last_name = $model->lastName; 
+				$aff_email = $model->email;
+				$login_url = get_option(WPAM_PluginConfig::$AffLoginPageURL);
+
 				//Notify affiliate of their application
 				$affsubj  = sprintf(__('Affiliate application for %s', 'affiliates-manager' ), $blogname);
 				$affmessage = WPAM_MessageHelper::GetMessage('affiliate_application_submitted_email');
-                                $tags = array("{blogname}","{affloginurl}","{aff_first_name}","{aff_last_name}","{aff_email}");
-                                $vals = array($blogname, $login_url, $aff_first_name, $aff_last_name, $aff_email);
-                                $body = str_replace($tags, $vals, $affmessage);
-				$mailer->mailAffiliate($request['_email'], $affsubj, $body);
+				$tags = array("{blogname}","{affloginurl}","{aff_first_name}","{aff_last_name}","{aff_email}");
+				$vals = array($blogname, $login_url, $aff_first_name, $aff_last_name, $aff_email);
+				$body = str_replace($tags, $vals, $affmessage);
+				$mail_to = sanitize_email($request['_email']);
+				
+				$mailer->mailAffiliate($mail_to, $affsubj, $body);
 
 				return new WPAM_Pages_TemplateResponse('affiliate_application_submitted');
 			} 
-                        else {
+			else {
 				return $this->getForm( $affiliateFields, $request, $vr );
 			}
 		}

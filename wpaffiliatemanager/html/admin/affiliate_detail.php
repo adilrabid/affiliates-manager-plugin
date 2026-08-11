@@ -29,12 +29,12 @@ $user = $this->viewData['user'];
 
 			doJsonRequest(
 				{
-                                        'action' : 'wpam_ajax_approve_application',
+					'action' : 'wpam_ajax_approve_application',
 					'handler' : 'approveApplication',
-					'affiliateId' : <?php echo $model->affiliateId?>,
+					'affiliateId' : <?php echo esc_attr($model->affiliateId)?>,
 					'bountyType' : bountyType,
 					'bountyAmount' : bountyAmount,
-                                        'nonce' : '<?php echo wp_create_nonce('wpam-ajax-approve-application')?>'
+					'nonce' : '<?php echo wp_create_nonce('wpam-ajax-approve-application')?>'
 				},
 				jsonFinished
 			);
@@ -140,13 +140,13 @@ $user = $this->viewData['user'];
 		function declineConfirmClicked() {
 			jQuery('#dialog-confirm').dialog('option', 'buttons', [
 				{
-				  text : '<?php echo sprintf( __( 'YES, Block all applications from %s', 'affiliates-manager' ), $model->email ) ?>',
+				  text : '<?php echo sprintf( __( 'YES, Block all applications from %s', 'affiliates-manager' ), esc_attr($model->email) ) ?>',
 				  click : function() {
 					doJsonRequest({
-                                                action : 'wpam_ajax_block_application',
+						action : 'wpam_ajax_block_application',
 						handler : 'blockApplication',
-						affiliateId : <?php echo $model->affiliateId?>,
-                                                nonce : '<?php echo wp_create_nonce('wpam-ajax-block-application')?>'
+						affiliateId : <?php echo esc_attr($model->affiliateId)?>,
+						nonce : '<?php echo wp_create_nonce('wpam-ajax-block-application')?>'
 					}, jsonFinished);
 				  }
 				},
@@ -154,10 +154,10 @@ $user = $this->viewData['user'];
 				  text: '<?php _e( 'NO, They may re-apply', 'affiliates-manager' ) ?>',
 				  click : function() {
 					doJsonRequest({
-                                                action : 'wpam_ajax_decline_application',
+						action : 'wpam_ajax_decline_application',
 						handler : 'declineApplication',
-						affiliateId : <?php echo $model->affiliateId?>,
-                                                nonce : '<?php echo wp_create_nonce('wpam-ajax-decline-application')?>'
+						affiliateId : <?php echo esc_attr($model->affiliateId)?>,
+						nonce : '<?php echo wp_create_nonce('wpam-ajax-decline-application')?>'
 					}, jsonFinished);
 				  }
 				} ]
@@ -172,19 +172,19 @@ $user = $this->viewData['user'];
 		function activateConfirmClicked()
 		{
 			doJsonRequest({
-                                action : 'wpam_ajax_activate_affiliate',
+				action : 'wpam_ajax_activate_affiliate',
 				handler : 'activateAffiliate',
-				affiliateId : <?php echo $model->affiliateId?>,
-                                nonce : '<?php echo wp_create_nonce('wpam-ajax-activate-affiliate')?>'
+				affiliateId : <?php echo esc_attr($model->affiliateId)?>,
+				nonce : '<?php echo wp_create_nonce('wpam-ajax-activate-affiliate')?>'
 			}, jsonFinished);
 		}
 
 		function deactivateConfirmClicked() {
 			doJsonRequest({
-                                action : 'wpam_ajax_deactivate_affiliate',
+				action : 'wpam_ajax_deactivate_affiliate',
 				handler : 'deactivateAffiliate',
-				affiliateId : <?php echo $model->affiliateId?>,
-                                nonce : '<?php echo wp_create_nonce('wpam-ajax-deactivate-affiliate')?>'
+				affiliateId : <?php echo esc_attr($model->affiliateId)?>,
+				nonce : '<?php echo wp_create_nonce('wpam-ajax-deactivate-affiliate')?>'
 			}, jsonFinished);
 		}
 
@@ -202,13 +202,13 @@ $user = $this->viewData['user'];
 		function doAddTransaction(type, amount, description)
 		{
 			doJsonRequest({
-                                action : 'wpam_ajax_add_transaction',
+				action : 'wpam_ajax_add_transaction',
 				handler: 'addTransaction',
-				affiliateId: <?php echo $model->affiliateId?>,
+				affiliateId: <?php echo esc_attr($model->affiliateId)?>,
 				amount: amount,
 				description: description,
 				type: type,
-                                nonce : '<?php echo wp_create_nonce('wpam-ajax-add-transaction')?>'
+				nonce : '<?php echo wp_create_nonce('wpam-ajax-add-transaction')?>'
 			}, jsonFinished);
 		}
 
